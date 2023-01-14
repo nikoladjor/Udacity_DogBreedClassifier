@@ -163,11 +163,11 @@ cython_debug/
 
 
 # Local notebooks
-./dog_classifier_app/mlsrc/notebooks_dev
+dog_classifier_app/mlsrc/notebooks_dev
 
 # Keras datasets and local data
-./dog_classifier_app/mlsrc/data
-./dog_classifier_app/mlsrc/keras_datasets
+dog_classifier_app/mlsrc/data
+dog_classifier_app/mlsrc/keras_datasets
 
 
 
