@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title%}Upload Image{% endblock %}</h1>
+{% endblock header %}
+
+{% block content %}
+
+<div class="container">
+    <form action = "http://localhost:5000/face_detector" method = "POST" enctype = "multipart/form-data">
+        <input type = "file" name = "file" />
+        <input type="submit" value="Upload Image"/>
+    </form>     
+</div>
+
+{% endblock content %}

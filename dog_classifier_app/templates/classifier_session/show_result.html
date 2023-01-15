@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title%}Upload Image{% endblock %}</h1>
+{% endblock header %}
+<!-- <script src="{{url_for('static', filename='drawPieChart.js')}}"></script> -->
+
+
+
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+          <div class="card">
+            <img src="../../static/images/{{original}}" align="middle" />
+            <div class="card-body">
+              <h5 class="card-title">Uloaded Image</h5>
+              <p class="card-text">{{res_string}}</p>
+              <p class="card-text">Predicted breed: {{breed}}.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div>
+            <canvas id="pieChart"></canvas>
+            <p>I am here!</p>
+          </div>
+        </div>
+    </div>   
+</div> 
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{%block javascript%}
+
+<script>
+  const ctx = document.getElementById('pieChart');
+  labels = JSON.parse({{chart_labels | tojson}})
+  data = JSON.parse({{chart_data | tojson}})
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Probability',
+        data: data,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+{% endblock javascript%}
+{% endblock content %}

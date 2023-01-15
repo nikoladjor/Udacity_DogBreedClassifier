@@ -1,0 +1,21 @@
+.banner-icon{
+    display:block;
+    font-size: 20px;
+    line-height: 50px;
+    color:white;
+    width: 100px;
+    height: 50px;
+    text-align: center;
+}
+
+.banner-icon-text{
+    font-size:12px; 
+    margin-top:30px; 
+    display:block; 
+    text-align:center
+}
+
+.center{
+    text-align: center;
+    width: 100%;
+}
