@@ -113,11 +113,18 @@ def load_npz_from_url(network):
     return [train_data, valid_data, test_data]
 
 def train_model(network, epochs=20, data_path = Path(__file__).parent / "data/dog_images"):
+    """Use transfer learning to train the model faster using pre-trained bottleneck features from other CNN.
+    This function is used only in notebook for training.
+
+    Args:
+        network (string): Bottleneck features network to use
+        epochs (int, optional): Number of epochs to use. Defaults to 20.
+        data_path (Path, optional): Path to data files. Defaults to Path(__file__).parent/"data/dog_images".
+
+    Returns:
+        list: Returns trained model and test data for convenient post-testing.
     """
-    Use transfer learning to train the model faster using pre-trained bottleneck features from other CNN.
-    
-    """
-    
+     
     train_data, valid_data, test_data = load_npz_from_url(network)
     train_targets, valid_targets, _ = load_dog_datasets(data_path)
     model = Sequential()
@@ -148,6 +155,16 @@ def train_model(network, epochs=20, data_path = Path(__file__).parent / "data/do
     return model, test_data
 
 def test_model(model, test_data, test_targets):
+    """Utility function to test the model. Returns the accuracy of the given model for the input data.
+
+    Args:
+        model (TensorFlow model): CNN model to be tested.
+        test_data (list): List of data to be tested
+        test_targets (list): Test labels.
+
+    Returns:
+        float: Returns test accuracy
+    """
     # get index of predicted dog breed for each image in test set
     model_predictions = [np.argmax(model.predict(np.expand_dims(feature, axis=0))) for feature in test_data]
 
@@ -158,6 +175,16 @@ def test_model(model, test_data, test_targets):
 
 
 def get_model(network, dev=True, path_to_models=Path(__file__).parent / "saved_models"):
+    """Loads the saved model to be used.
+
+    Args:
+        network (string): Bottleneck network used for training.
+        dev (bool, optional): Flag to tell if there is dev in name of model. Defaults to True.
+        path_to_models (Path, optional): Path to model. Defaults to Path(__file__).parent/"saved_models".
+
+    Returns:
+        tf.model: Tensorflow model.
+    """
     assert network in network_bottleneck.keys(), 'Cannot find extract function!'
     # TODO: make this more general, since this is dev at the moment!!!
     model = load_model( path_to_models /  f'model.dev.{network}.hdf5')
@@ -165,6 +192,18 @@ def get_model(network, dev=True, path_to_models=Path(__file__).parent / "saved_m
     
 
 def predict_dog_breed(model, network, img_path, dog_categories_path=Path(__file__).parent / "data" / "dog_images"):
+    """Core function for predicting dog breed. It takes model, network for bottleneck features, path to image to predict the breed of dog in the image. 
+    This function assumes that there is dog in the image.
+
+    Args:
+        model (Tensorflow model): CNN model used for classification/prediction.
+        network (string): Network of bottleneck features.
+        img_path (Path): Path to image
+        dog_categories_path (Path, optional): Path where image labels for dog categories are stored. Defaults to Path(__file__).parent/"data"/"dog_images".
+
+    Returns:
+        _type_: _description_
+    """
     assert network in network_bottleneck.keys(), 'Cannot find extract function!'
     # Extract bottleneck features
     bottleneck_feature = network_bottleneck[network](path_to_tensor(img_path))    
@@ -172,7 +211,7 @@ def predict_dog_breed(model, network, img_path, dog_categories_path=Path(__file_
     # Propagate the feauters
     predicted_probs = model.predict(bottleneck_feature)
     sorted_idx = np.argsort(predicted_probs)
-    
+    # TODO: Load this on the server init --> might save some time.
     dog_names = load_dog_categories(dog_categories_path)
 
     _N_FIRST_RET = 5
