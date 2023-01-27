@@ -17,7 +17,7 @@
     <div class="px-3 py-3 text-bg-dark flex-wrap align-items-center justify-content-center">
       <div class="container">
           <ul class="nav col-12 col-lg-auto justify-content-left text-small">
-            <li>
+            <li>  
               <a href="/" class="nav-link text-white">
                 <span class="fa fa-stack fa-2x" style="width:fit-content;">
                   <i class="fa fa-solid fa-home fa-stack-1x"></i>
@@ -25,17 +25,30 @@
                 </span>
               </a>
             </li>
+
             <li>
-              <a href="/session" class="nav-link text-white">
+              <a href="/create_session" class="nav-link text-white">
                 <span class="fa fa-stack fa-2x" style="width:fit-content">
                   <i class="fa fa-solid fa-play fa-stack-1x"></i>
                   <span class="banner-icon-text">
                     Start New Session
                   </span>                  
                 </span>
-
               </a>
             </li>
+
+            <li>
+              {# TODO: handle the link here #}
+              <a href="/stop_session" class="nav-link text-white">
+                <span class="fa fa-stack fa-2x" style="width:fit-content">
+                  <i class="fa fa-solid fa-stop fa-stack-1x"></i>
+                  <span class="banner-icon-text">
+                    Stop the session
+                  </span>                  
+                </span>
+              </a>
+            </li>
+
           </ul>
         </div>
 

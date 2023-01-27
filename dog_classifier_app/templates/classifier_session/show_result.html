@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block header %}
     <h1>{% block title%}Upload Image{% endblock %}</h1>
@@ -6,14 +6,15 @@
 <!-- <script src="{{url_for('static', filename='drawPieChart.js')}}"></script> -->
 
 
-
-
 {% block content %}
+
+
+
 <div class="container">
     <div class="row">
         <div class="col-sm-3">
           <div class="card">
-            <img src="../../static/images/{{original}}" align="middle" />
+            <img src="../../static/images/{{session['random_hash']}}/{{original}}" align="middle" />
             <div class="card-body">
               <h5 class="card-title">Uloaded Image</h5>
               <p class="card-text">{{res_string}}</p>
