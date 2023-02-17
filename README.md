@@ -25,8 +25,8 @@ Sample output:\
 In order to build the dog breed classifier, all the data for training models and building the final neural network are provided by Udacity. There are three main steps towards the final model build.
 
 1. [Detecting the face in the image](#face-detector)
-2. [Detecting the dog in the image](#dog-detector)\
-3. [Building the convolutional neural network](#transfer-learning)\
+2. [Detecting the dog in the image](#dog-detector)
+3. [Building the convolutional neural network](#transfer-learning)
 
 ### Face Detector
 To detect faces in the user-supplied image, we use OpenCV's implementation of [Haar feature-based cascade classifiers](https://docs.opencv.org/3.4/db/d28/tutorial_cascade_classifier.html) to detect human faces in images. OpenCV provides many pre-trained face detectors, stored as XML files on github, but in the project, Udacity already supplied on of the detectors.
