@@ -9,6 +9,7 @@ import numpy as np
 from glob import glob
 from pathlib import Path
 
+
 # define function to load train, test, and validation datasets
 def load_dataset(path: Path):
     """Load a single dataset on a given path
@@ -70,6 +71,8 @@ def load_dog_categories(path: Path):
     dog_names = [item.as_posix().split('/')[-1].split(".")[-1] for item in sorted(path.glob('./train/*/'))]
     return dog_names
 
+DOG_CAT_PATH = Path(__file__).parent / "data" / "dog_images"
+DOG_NAMES = load_dog_categories(DOG_CAT_PATH)
 
 # This should be stored in some json file, but dict will do for now...
 RESNET_URL = 'https://s3-us-west-1.amazonaws.com/udacity-aind/dog-project/DogResnet50Data.npz'
@@ -191,7 +194,7 @@ def get_model(network, dev=True, path_to_models=Path(__file__).parent / "saved_m
     return model
     
 
-def predict_dog_breed(model, network, img_path, dog_categories_path=Path(__file__).parent / "data" / "dog_images"):
+def predict_dog_breed(model, network, img_path):
     """Core function for predicting dog breed. It takes model, network for bottleneck features, path to image to predict the breed of dog in the image. 
     This function assumes that there is dog in the image.
 
@@ -211,8 +214,7 @@ def predict_dog_breed(model, network, img_path, dog_categories_path=Path(__file_
     # Propagate the feauters
     predicted_probs = model.predict(bottleneck_feature)
     sorted_idx = np.argsort(predicted_probs)
-    # TODO: Load this on the server init --> might save some time.
-    dog_names = load_dog_categories(dog_categories_path)
+    dog_names = DOG_NAMES
 
     _N_FIRST_RET = 5
 
@@ -221,7 +223,7 @@ def predict_dog_breed(model, network, img_path, dog_categories_path=Path(__file_
     vvs = np.take_along_axis(predicted_probs, sorted_idx, axis=-1)[0]
     print(kks,vvs)
 
-    return dog_names[np.argmax(predicted_probs)], dict(zip( kks[-_N_FIRST_RET:], [float(item) for item in vvs[-_N_FIRST_RET:]]))
+    return dog_names[np.argmax(predicted_probs)], dict(zip( reversed(kks[-_N_FIRST_RET:]), [float(item) for item in reversed(vvs[-_N_FIRST_RET:])]))
 
 
 def dog_breed_clasifier(model, img_path: Path, network = 'Xception') -> str:
