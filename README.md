@@ -17,7 +17,7 @@
 This is a web application for the Udacity Data science Nanodegree Capstone project. In this project, I built a pipeline that can be used within a web or mobile app to process real-world, user-supplied images.  Given an image of a dog, the underlying algorithm will identify an estimate of the dog’s breed.  If supplied an image of a human, the code will identify the resembling dog breed. The goal of the project is that the final deep-learning model has accuracy score larger then 60%. Final model developed using a transfer-learining approach with Xception bottleneck features has accuracy of **>84%**.
 
 Sample output:\
-![Sample Output][image1]
+![Sample Output][imageUsage]
 
 
 ## Deep-Learning Pipeline
@@ -61,6 +61,12 @@ Alongside the predicted breed, top 5 predicted probabilities are shown.
 
 
 ### Installation
+
+The app is developed using `python 3.10.7` and all packages can be installed using 
+```
+git clone https://github.com/nikoladjor/Udacity_DogBreedClassifier
+pip install requirements.txt
+```
 
 
 **NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). 
