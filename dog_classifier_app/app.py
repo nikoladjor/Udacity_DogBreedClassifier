@@ -11,16 +11,16 @@ from .mlsrc.classification import dog_breed_clasifier, get_model
 import secrets
 import shutil
 import pandas as pd
-
+import numpy as np
 
 UPLOAD_FOLDER = Path(__file__).parent / 'static/images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 def get_num_images(db, hash):
-    return len(db[db.hash == hash])
+    return len(db[db.hash == hash]['original'].unique())
 
 def get_images(db, hash):
-    return list(db[db.hash==hash]['original'])
+    return list(db[db.hash==hash]['original'].unique())
 
 
 def create_app(test_config=None):
@@ -67,6 +67,9 @@ def create_app(test_config=None):
     def home():
         return render_template("index.html")
     # a simple page that says hello
+    @app.route('/cnn_explained')
+    def training_description():
+        return render_template("cnn_explained.html")
     
     @app.route('/create_session', methods=["GET", "POST"])
     def create_session():
@@ -92,12 +95,6 @@ def create_app(test_config=None):
             else:
                 return render_template("/classifier_session/create_session_form.html")
     
-    @app.route('/session', methods=['GET', 'POST'])
-    def classifier_task():
-        if 'username' in session:
-            return render_template("/classifier_session/upload_image.html")
-        else:
-            redirect(url_for('create_session'))
 
     @app.route('/stop_session')
     def stop_session():
@@ -112,7 +109,7 @@ def create_app(test_config=None):
     def process_image_file():
         if request.method == 'POST':
             f = request.files['file']
-            filename = secure_filename(f.filename)#
+            filename = secure_filename(f.filename)
             
             # Make sure that there is session activated
             if 'username' in session:
@@ -147,28 +144,35 @@ def create_app(test_config=None):
                 app.db = pd.concat([app.db, tmp_df])
             
             else:
-                if f.filename not in app.db['original']:
+                if not np.isin(f.filename, app.db['original'].unique()):
                     app.db = pd.concat([app.db, tmp_df])
             # BUG: FIX HOW DATA ARE STORED!
             selection = app.db[app.db['hash'] == session['random_hash']]
-            # Clean up
-            _chart_lbls = selection['chart_labels'].values.tolist()
-            _chart_data = selection['chart_data'].values.tolist()
-            print(_chart_lbls)
-            _canvas_ids = [f"canvas_{i}" for i in range(len(_chart_data))]
+            num_imgs = get_num_images(selection, session['random_hash'])
+            imgs = get_images(selection, hash=session['random_hash'])
+            
+            _chart_lbls = []
+            _chart_data = []
+            
+            for i in range(num_imgs):
+                _chart_lbls.append(list(selection[selection['original']==imgs[i]]['chart_labels'].values))
+                _chart_data.append(list(selection[selection['original']==imgs[i]]['chart_data'].values))
+
+
+            _canvas_ids = [f"canvas_{i}" for i in range(num_imgs)]
 
             # print(app.db['hash'].unique())
 
             return render_template("/classifier_session/show_result.html", 
-                                    num_imgs=get_num_images(selection, session['random_hash']),
-                                    imgs = get_images(selection, hash=session['random_hash']),
+                                    num_imgs=num_imgs,
+                                    imgs=imgs,
                                     selection=selection,
                                     chart_labels = _chart_lbls,
                                     chart_data = _chart_data,
                                     canvas_array = _canvas_ids,
                                     id_list = list(range(len(_canvas_ids)))
                                     )
-            
+          
         return render_template("/classifier_session/show_result.html", num_imgs=0, canvas_array=[], chart_labels=[], chart_data=[])
 
 
@@ -177,4 +181,4 @@ def create_app(test_config=None):
     return app
 
 app = create_app()
-app.run()
+# app.run()
