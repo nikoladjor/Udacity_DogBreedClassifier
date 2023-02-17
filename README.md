@@ -8,8 +8,6 @@
 [imageUsage]: ./docs/DogBreedExample.png		"App Example Usage"
 
 
-
-
 # Udacity Data Science Nanodegree Capstone: Dog Breed Classifier
 
 ## Project Description
@@ -63,10 +61,13 @@ Alongside the predicted breed, top 5 predicted probabilities are shown.
 ### Installation
 
 The app is developed using `python 3.10.7` and all packages can be installed using 
-```
+```shell
 git clone https://github.com/nikoladjor/Udacity_DogBreedClassifier
 pip install requirements.txt
 ```
+After installation, the app can be started as using standard flask command:
+```python
+flask --app dog_classifier_app/app.py --debug run
+```
 
-
-**NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). 
+**NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). The training jupyter notebook is using virtual environment pre-set on AWS and is different from the environment used for the app developement. 
