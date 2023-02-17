@@ -12,7 +12,27 @@
     </div>
 
     <div>
-        <h1 class="important">DESCRIPTION HERE</h1>
+        <h2 class="important">DESCRIPTION</h2>
+        <p>This web-app is the capstopne project for Udacity Data Science Nanodegree (LINK HERE). The goal of this project is classification of dog breeds based on an uploaded image.</p>
+        <p>
+        After an image is uploaded, it is analyzed using Convolutional Neural Network (CNN) in order to classify the breed of the uploaded image (assuming it is dog). If the pre-processor detects a human in the image, it will proceed with the classification, so some funny answers are expected :).
+        If, however, there is no human or dog detected, the result will be `None`.
+        </p>
+        <h2 class="important">CNN TRAINING</h2>
+        <p>
+        A pre trained <a href="http://ethereon.github.io/netscope/#/gist/db945b393d40bfa26006">ResNet-50</a> model is used for detecting a dog in the uploaded image.
+        Using the <a href="https://keras.io/guides/transfer_learning/">transfer learning</a> approach and different bottleneck features, our CNN leverages pre-trained models and adds fine-tuning layers at the end.
+        Step-by-step explanation of realization of the machine-learning part of this project is explained in <a href="/cnn_explained">jupyter notebook</a>.
+        </p>
+
+        <h2 class="important">USAGE INSTRUCTIONS</h2>
+        <p>
+        After clicking the start session button above, the virtual session will be started. It will prompt for the username, but the username is only needed
+        for generating the random hash which is needed for temporary storage of uploaded images. This protocol is using flask <a href="https://flask.palletsprojects.com/en/2.2.x/api/#sessions">session</a>.
+        After that, the images can be uploaded and the predicted breed as well as uploaded image will be shown.
+        </p>
+        <h2 class="important">DATA DISCLAIMER</h2>
+        <p>Since there is no limit to what image can be uploaded, the only guaranty is that I will not process nor use the images. The code is proveded on GitHub, and thus it can be seen there that the temporary storage is deleted after clicking stop-session button.</p>
     </div>
     
 </div>

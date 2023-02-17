@@ -3,60 +3,111 @@
 {% block header %}
     <h1>{% block title%}Upload Image{% endblock %}</h1>
 {% endblock header %}
-<!-- <script src="{{url_for('static', filename='drawPieChart.js')}}"></script> -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 {% block content %}
 
-
-
 <div class="container">
+    
+    <h2>Upload image here:</h2>
+    <form action = "http://localhost:5000/face_detector" method = "POST" enctype = "multipart/form-data">
+        <input type="file" name="file" id="fileUpload"/>
+        <input type="submit" value="Upload Image" id="submitFile" disabled="disabled"/>
+    </form>
+
+    <p>Number of files: {{ num_imgs }}</p>
+
     <div class="row">
-        <div class="col-sm-3">
-          <div class="card">
-            <img src="../../static/images/{{session['random_hash']}}/{{original}}" align="middle" />
-            <div class="card-body">
-              <h5 class="card-title">Uloaded Image</h5>
-              <p class="card-text">{{res_string}}</p>
-              <p class="card-text">Predicted breed: {{breed}}.</p>
+      
+      {% for i in range(num_imgs) %}
+          {% set res=imgs[i] %}
+          <div class="col-sm-4">
+            <div class="card">
+              <img class="card-image" src="../../static/images/{{session['random_hash']}}/{{res}}" align="middle" />
+              <div class="card-body">
+                <p class="card-text">Predicted breed: {{(selection[selection['original']==imgs[i]]['predicted_breed'].unique()[0])}}</p>
+                <div>
+                  <h2>Probabilities:</h2>
+                  <canvas id='canvas_{{i}}'></canvas>
+
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-sm-3">
-          <div>
-            <canvas id="pieChart"></canvas>
-            <p>I am here!</p>
-          </div>
-        </div>
-    </div>   
+      
+      {% endfor %}
+      
+    </div>
+
+  
+ 
 </div> 
 
+<script type="text/javascript">
+  {% block javascript %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{%block javascript%}
 
-<script>
-  const ctx = document.getElementById('pieChart');
-  labels = JSON.parse({{chart_labels | tojson}})
-  data = JSON.parse({{chart_data | tojson}})
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Probability',
-        data: data,
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
+  $(document).ready(
+    function(){
+        $('#fileUpload').change(
+            function(){
+                if ($(this).val()) {
+                    $('#submitFile').attr('disabled',false); 
+                } 
+            }
+            );
+    });
+
+
+
+  function drawPieChart(canvas_ids, chart_labels, chart_data, font_setup) {
+  for (let i=0; i<canvas_ids.length; i++) {
+    var ctx = document.getElementById(canvas_ids[i]);    
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chart_labels[i],
+        datasets: [{
+          label: 'Probability',
+          data: chart_data[i],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            font: font_setup
+          },
+          x: {
+            font: font_setup
+          }
+        },
+        indexAxis: 'y', 
+        responsive: true,
+        plugins: {
+          legend: {
+            font: font_setup
+          }
         }
       }
-    }
-  });
+    });
+  }
+  };
+  {#labels_conv TODO: make canvas be assigned  #}
+  var canvas_ids = {{canvas_array | tojson}};
+  var labels_conv = {{chart_labels | tojson}};
+  var data = {{chart_data | tojson}};
+  const font_setup = {
+      family: 'Helvetica',
+      size: 20
+    };
+
+  drawPieChart(canvas_ids, labels_conv, data, font_setup);
+  {% endblock javascript %}
 </script>
-{% endblock javascript%}
+
+
 {% endblock content %}
