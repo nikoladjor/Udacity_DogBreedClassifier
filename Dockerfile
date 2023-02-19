@@ -2,8 +2,6 @@
 # FROM python:3.10
 FROM tensorflow/tensorflow
 
-
-
 EXPOSE 5000
 
 # Keeps Python from generating .pyc files in the container
