@@ -60,6 +60,8 @@ Alongside the predicted breed, top 5 predicted probabilities are shown.
 
 ### Installation
 
+#### Standard install
+
 The app is developed using `python 3.10.7` and all packages can be installed using 
 ```shell
 git clone https://github.com/nikoladjor/Udacity_DogBreedClassifier
@@ -69,5 +71,17 @@ After installation, the app can be started as using standard flask command:
 ```python
 flask --app dog_classifier_app/app.py --debug run
 ```
+> **NOTE**: during the testing on macOS, I had an issue with SSL certificates that are needed to download the ResNet50. This is why I also decided to publish the app with Docker as well.
 
-**NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). The training jupyter notebook is using virtual environment pre-set on AWS and is different from the environment used for the app developement. 
+
+#### Installation using Docker
+This web-app can also be run using Docker. If new to Docker, please follow the installation and building app [tutorial](https://docs.docker.com/language/python/build-images/).
+
+Assuming that Docker is up and running, try to build and run the container 
+```bash
+docker build -t test_me:latest .
+```
+
+
+
+>**NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). The training jupyter notebook is using virtual environment pre-set on AWS and is different from the environment used for the app developement. 
