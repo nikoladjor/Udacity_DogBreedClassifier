@@ -1,11 +1,12 @@
-from keras.utils import get_file
+import tensorflow as tf
+
+# from keras.utils import get_file
 from keras.models import load_model
 from .extract_bottleneck_features import *
 import numpy as np
 from .image_processing import *
 from sklearn.datasets import load_files       
 from keras.utils import np_utils
-import numpy as np
 from glob import glob
 from pathlib import Path
 
@@ -107,7 +108,7 @@ def load_npz_from_url(network):
     
     assert network in network_npz.keys(), 'Cannot figure out the URL!'
     
-    path = get_file(f'tmp_Dog{network}_Data.npz', network_npz[network])
+    path = tf.keras.utils.get_file(f'tmp_Dog{network}_Data.npz', network_npz[network])
     with np.load(path) as data:
         train_data = data['train']
         valid_data = data['valid']
@@ -190,7 +191,8 @@ def get_model(network, dev=True, path_to_models=Path(__file__).parent / "saved_m
     """
     assert network in network_bottleneck.keys(), 'Cannot find extract function!'
     # TODO: make this more general, since this is dev at the moment!!!
-    model = load_model( path_to_models /  f'model.dev.{network}.hdf5')
+    tst_path = path_to_models /  f'model.dev.{network}.hdf5'
+    model = load_model(tst_path.as_uri())
     return model
     
 
