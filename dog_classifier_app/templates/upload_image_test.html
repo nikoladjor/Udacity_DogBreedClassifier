@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Test Name Form!
+{% endblock title %}
+
+
+{% block content %}
+
+
+<div class="container">
+    <h1>What's your name</h1>
+
+    {% if f %}
+    <h1>Uploaded {{filename}}</h1>
+    <br>
+    <p>This should be processed now...</p>
+    {% else %}
+    
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ form.image.label(
+            class="form-label"
+        ) }}
+        {{ form.image(class="form-control") }}
+        <br/>
+        {{ form.submit(
+            class='btn btn-primary'
+        ) }}
+    </form>
+
+    {% endif %}
+</div>
+
+
+
+
+{% endblock content%}
