@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Test Name Form!
+{% endblock title %}
+
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+
+<div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+
+{% endfor %}
+
+
+<div class="container">
+    <h1>What's your name</h1>
+
+    {% if name %}
+        <h1>User added: {{name}}</h1>
+        {% for user in all_users%}
+        {{user.id}}
+        <br>
+        {{user.name}}
+        <br>
+        {{user.date_created}}
+        <br>
+        {% endfor %}
+    {% else %}
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control") }}
+        <br/>
+        {{ form.email_address.label(class="form-label")}}
+        {{ form.email_address(class="form-control") }}
+        <br/>
+        {{ form.submit(class='btn btn-primary') }}
+    </form>
+
+    <br>
+    <br>
+    <br>
+
+    {% endif %}
+</div>
+
+
+
+
+{% endblock content%}

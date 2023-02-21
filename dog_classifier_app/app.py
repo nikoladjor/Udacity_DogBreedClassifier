@@ -1,6 +1,6 @@
 import os, sys
 from pathlib import Path
-from flask import Flask, session, url_for, redirect
+from flask import Flask, session, url_for, redirect, flash, get_flashed_messages
 from . import classifier_session
 from flask_bootstrap import Bootstrap
 from flask import render_template, request
@@ -11,6 +11,7 @@ from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import DataRequired
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from .mlsrc.classification import dog_breed_clasifier, get_model
@@ -49,6 +50,7 @@ app.config.from_mapping(
 )
 # Init the database
 db = SQLAlchemy(app=app)
+migrate = Migrate(app, db)
 
 # Create User model
 class User(db.Model):
@@ -56,16 +58,35 @@ class User(db.Model):
     name = db.Column(db.String(200), nullable=False)
     email_address = db.Column(db.String(100), nullable=False, unique=True)
     date_created = db.Column(db.DateTime, default=datetime.now)
+    images = db.relationship('Image', backref='user', lazy=True)
 
     def __repr__(self) -> str:
         return f"User: <{self.name}>, created on <{self.date_created}>"
 
+# Create Model to store image information
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_path = db.Column(db.String(512))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    predictions = db.relationship('BreedPrediction', backref='image', lazy=True)
+    def __repr__(self) -> str:
+        return f"<Image: {self.image_path}>"
+
+
+# Prediction probability 
+class BreedPrediction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    breed = db.Column(db.String(200), default='None')
+    probability = db.Column(db.Float, default=100.0)
+    image_id = db.Column(db.Integer, db.ForeignKey('image.id'))
+    def __repr__(self) -> str:
+        return f"<Predicted Breed: {self.breed} with {self.probability} probability>"
 
 
 # Forms
 class UserForm(FlaskForm):
     name = StringField(label="User name", validators=[DataRequired()])
-    # email_address = EmailField(label="Enter email address", validators=[DataRequired()])
+    email_address = EmailField(label="Enter email address", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 class ImageUploadForm(FlaskForm):
@@ -202,16 +223,25 @@ def process_image_file():
         
     return render_template("/classifier_session/show_result.html", num_imgs=0, canvas_array=[], chart_labels=[], chart_data=[])
 
-@app.route('/name', methods=['GET', 'POST'])
-def names():
+@app.route('/user/add', methods=['GET', 'POST'])
+def add_user():
     name = None
     form = UserForm()
     # Validate the form
     if form.validate_on_submit():
+        usr_query = User.query.filter_by(email_address=form.email_address.data).first()
+        if not usr_query:
+            user = User(name=form.name.data, email_address=form.email_address.data)
+            db.session.add(user)
+            db.session.commit()
+
         name = form.name.data
         form.name.data = ''
+        form.email_address.data = ''
+        flash("User Added!")
     
-    return render_template("name.html", name=name, form=form)
+    all_users = User.query.order_by(User.date_created)
+    return render_template("add_user.html", name=name, form=form, all_users=all_users)
 
 @app.route('/file/upload', methods=['GET', 'POST'])
 def file_uploader():
