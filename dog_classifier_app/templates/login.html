@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Test Name Form!
+    Test Login Form!
 {% endblock title %}
 
 
@@ -19,27 +19,21 @@
 
 
 <div class="container">
-    <h1>Add User</h1>
+    <h1>LogIn User</h1>
     
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.username.label(class="form-label") }}
         {{ form.username(class="form-control") }}
         <br/>
-        {{ form.email_address.label(class="form-label")}}
-        {{ form.email_address(class="form-control") }}
-        <br/>
-        <br/>
         {{ form.password.label(class="form-label")}}
         {{ form.password(class="form-control") }}
         <br/>
-        <br/>
-        {{ form.password_confirm.label(class="form-label")}}
-        {{ form.password_confirm(class="form-control") }}
-        <br/>
         {{ form.submit(class='btn btn-primary') }}
     </form>
-
+    <br/>
+    <p>No account yet? </p>
+    <a class="btn btn-primary" href="/user/add" role="button">Create User</a>
 </div>
 
 
