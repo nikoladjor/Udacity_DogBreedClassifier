@@ -9,14 +9,7 @@
 
 
 <div class="container">
-    <h1>What's your name</h1>
 
-    {% if f %}
-    <h1>Uploaded {{filename}}</h1>
-    <br>
-    <p>This should be processed now...</p>
-    {% else %}
-    
     <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         {{ form.image.label(
@@ -29,7 +22,52 @@
         ) }}
     </form>
 
-    {% endif %}
+    <div class="row">
+        {% for img in user_images %}
+        <div class="col-sm-4">
+            <div class="card">
+              
+              <img class="card-image" src="{{ url_for('static', filename='images/usr_None' + '_' +user.folder_hash + '/' + img.filename)}}">
+    
+              <div class="card-body">
+
+                  <h2>Probabilities:</h2>
+                    <table class="table table-hover table-bordered table-striped">
+                      <tr>
+                        <td>
+                          Breed
+                        </td>
+                        <td>
+                          Probability
+                        </td>
+                      </tr>
+
+                      {% for breedprob in img.predictions%}
+                      <tr>
+                        <td>
+                          {{breedprob.breed}}
+                        </td>
+                        <td>
+                          {{breedprob.probability}}
+                        </td>
+                      </tr>
+                      <!-- {{img.breed_probabilities}} -->
+
+                      {% endfor %}
+
+                    </table>
+                
+                  <!-- <canvas id='canvas_{{i}}'></canvas> -->
+    
+                <a href="{{url_for('delete_image', id=img.id)}}" class="btn btn-primary">Delete</a>
+              </div>
+            </div>
+          </div>
+        {% endfor%}
+    </div>
+
+
+    
 </div>
 
 
