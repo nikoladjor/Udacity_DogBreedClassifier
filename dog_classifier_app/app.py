@@ -15,11 +15,12 @@ from flask_migrate import Migrate
 
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView, helpers, expose
 from flask_admin.contrib.sqla import ModelView
 
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.urls import url_parse
 from datetime import datetime
 from .mlsrc.classification import dog_breed_clasifier, get_model
 import secrets
@@ -63,7 +64,26 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-admin = Admin(app, name='dogbreed_classifier', template_mode='bootstrap3')
+
+# Model Views
+class MyModelView(ModelView):
+
+    def is_accessible(self):
+        return current_user.is_authenticated
+    
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
+class MyAdminIndexView(AdminIndexView):
+    @expose('/')
+    @login_required
+    def index(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'), next=request.url)
+        return super().index()
+
+admin = Admin(app, name='dogbreed_classifier', index_view=MyAdminIndexView(), base_template='admin.html', template_mode='bootstrap4')
+
 
 # Create User model
 class User(db.Model, UserMixin):
@@ -74,7 +94,8 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(256))
     # Hash to create folder on the server --> should 
     folder_hash = db.Column(db.String(8))
-    images = db.relationship('Image', backref='user', lazy=True)
+    images = db.relationship('Image', backref='user', lazy=True, 
+                             cascade="all, delete-orphan")
     user_upload = db.Column(db.String(100))
     # password utils
     @property
@@ -100,7 +121,7 @@ class User(db.Model, UserMixin):
     def __repr__(self) -> str:
         return f"User: <{self.username}>, created on <{self.date_created}>"
 
-admin.add_view(ModelView(User, db.session))
+admin.add_view(MyModelView(User, db.session))
 
 
 @login_manager.user_loader
@@ -113,7 +134,10 @@ class Image(db.Model):
     image_path = db.Column(db.String(128))
     filename = db.Column(db.String(128))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    predictions = db.relationship('BreedPrediction', backref='image', lazy=True)
+    predicted_breed = db.Column(db.String(128))
+    predictions = db.relationship('BreedPrediction', 
+                                  backref='image', lazy=True, 
+                                  cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"<Image: {self.image_path}>"
@@ -121,7 +145,7 @@ class Image(db.Model):
     @property
     def breed_probabilities(self):
         return BreedPrediction.DictFromPredictions(image_id=self.id)
-admin.add_view(ModelView(Image, db.session))
+admin.add_view(MyModelView(Image, db.session))
 
 
 # Prediction probability 
@@ -147,7 +171,7 @@ class BreedPrediction(db.Model):
     def DictFromPredictions(cls, image_id):
         predictions = BreedPrediction.query.filter_by(image_id=image_id).sort_by(BreedPrediction.probability)
         return predictions
-admin.add_view(ModelView(BreedPrediction, db.session))
+admin.add_view(MyModelView(BreedPrediction, db.session))
 
 
 # Forms
@@ -175,10 +199,6 @@ class ImageUploadForm(FlaskForm):
     submit = SubmitField("Upload")
 
 # ROUTING
-@app.errorhandler(403)
-def bad_session(e):
-    # note that we set the 404 status explicitly
-    return render_template('bad_session.html'), 403
 
 # ensure the instance folder exists
 try:
@@ -208,12 +228,18 @@ def login():
                 # OK to login
                 login_user(user)
                 flash(f"User {form.username.data} logged in successfully!")
+                # Now go to the desired page
+                next_page = request.args.get("next")
+                print(next_page)
+                if not next_page or url_parse(next_page).netloc != '':
+                    next_page = url_for('home')
+                return redirect(next_page)
             else:
                 flash("Wrong password!")
         else:
             # No user -- report error
             flash("No user with that username, please try again.")
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, next=request.url)
 
 @app.route('/logout')
 @login_required
@@ -246,13 +272,11 @@ def add_user():
         username = form.username.data
         form.username.data = ''
         form.email_address.data = ''
-        flash(f"User Added! Folder: {user.user_upload}")
     
     all_users = User.query.order_by(User.date_created)
     return render_template("add_user.html", username=username, form=form, all_users=all_users)
 
 
-# TODO: handle the user deletions
 @app.route('/user/delete/<int:id>')
 def delete_user(id):
     user_to_delete = User.query.get_or_404(id)
@@ -287,38 +311,36 @@ def file_uploader():
         filename = secure_filename(f.filename)
         form.image.data = None
         fpath = os.path.join(current_user.user_upload, filename)
+
         try:
-            f.save(fpath)
-            # After image upload, store the data in database
-            img = Image(image_path=fpath, user_id=current_user.id, filename=filename)
-            db.session.add(img)
-            db.session.commit()
+            if not os.path.exists(fpath):
+                f.save(fpath)
+                p_string, breed, probs_dict = dog_breed_clasifier(model=app.default_model, img_path=Path(fpath), network=app._NETWORK)
+
+                # After image upload, store the data in database
+                img = Image(image_path=fpath, user_id=current_user.id, 
+                            filename=filename, predicted_breed=breed)
+                db.session.add(img)
+                db.session.commit()
+                form.image.data = ''
+                current_image = Image.query.filter_by(image_path=fpath).first()
+                for kk, vv in probs_dict.items():
+                    try:
+                        prediction = BreedPrediction(breed=kk, probability=vv, image_id=current_image.id)
+                        db.session.add(prediction)
+                        db.session.commit()
+                    except:
+                        flash("ERROR IN STORING PREDICTIONS!")
+
+            else:
+                flash("Please upload another file<<<<<<<<<<<")
+                return redirect('/user/upload')
+
         except:
             raise BufferError("something wrong with the file")
         
-        # The image should be commited to the database at this point.
-        # Fetch the id and store the predictions
-        current_image = Image.query.filter_by(image_path=fpath).first()
-        p_string, breed, probs_dict = dog_breed_clasifier(model=app.default_model, img_path=Path(fpath), network=app._NETWORK)
-        for kk, vv in probs_dict.items():
-            try:
-                prediction = BreedPrediction(breed=kk, probability=vv, image_id=current_image.id)
-                db.session.add(prediction)
-                db.session.commit()
-            except:
-                flash("ERROR IN STORING PREDICTIONS!")
-
-
-
-        
-        # Create predictions and commit to the db
-        BreedPrediction.PredictionsFromDict(probs_dict, image_id=img.id)
-        # return probs_dict
-        # TODO: Build the predictions db tables and attach to the image
-
-        
     user_images = Image.query.filter_by(user_id=current_user.id)
-    return render_template("upload_image_test.html", f=f, form=form, filename=filename, user=current_user, user_images=user_images)
+    return render_template("dog_breed_classifier.html", f=f, form=form, filename=filename, user=current_user, user_images=user_images)
 
 @app.route('/image/delete/<int:id>')
 @login_required
@@ -332,29 +354,14 @@ def delete_image(id):
     form = ImageUploadForm()
     filename=None
 
-    image_to_delete = Image.query.get(id)
-    predictions_to_delete = BreedPrediction.query.filter_by(image_id=image_to_delete.id)
-    try:
-        
-        for pred in predictions_to_delete:
-            db.session.delete(pred)
-            db.session.commit()
+    image_to_delete = Image.query.get_or_404(id)
+    db.session.delete(image_to_delete)
+    db.session.commit()
+    flash("Image deleted!")
+    os.remove(image_to_delete.image_path)
+    user_images = Image.query.filter_by(user_id=current_user.id)
 
-        db.session.delete(image_to_delete)
-        db.session.commit()
-        flash("Image deleted!")
-        # delete folder here
-        shutil.rmtree(image_to_delete.image_path)
-        user_images = Image.query.filter_by(user_id=current_user.id)
-        return redirect(url_for('file_uploader', f=f, form=form, filename=filename, user=current_user, user_images=user_images))
-
-    except:
-        flash("ERROR! There was a problem deleting user")
-    
-        user_images = Image.query.filter_by(user_id=current_user.id)
-        return render_template("upload_image_test.html", f=f, form=form, filename=filename, user=current_user, user_images=user_images)
-
-
+    return redirect(url_for('file_uploader', f=f, form=form, filename=filename, user=current_user, user_images=user_images))
 
 
 

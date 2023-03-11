@@ -249,7 +249,7 @@ def dog_breed_clasifier(model, img_path: Path, network = 'Xception') -> str:
         _, _ishuman = face_detector(img_path=img_path)
         _isdog = dog_detector(img_path=img_path)
     except:
-        return ["PROBLEM WITH IMAGE, PLEASE USE JPG!", "ERROR"]
+        return ["PROBLEM WITH IMAGE, PLEASE USE JPG!", "ERROR", {100: None}]
     
     # img = plt.imread(img_path)
     # display the image, along with bounding box

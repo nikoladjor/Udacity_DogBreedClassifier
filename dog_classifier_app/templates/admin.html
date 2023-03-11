@@ -1,21 +1,21 @@
-{% extends "base.html" %}
+{% extends "admin/base.html" %}
 
-{% block title %}
-    Admin Area
-{% endblock title %}
+{% block access_control %}
+{% if current_user.is_authenticated %}
+<div class="dropdown show">
+  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="icon-user"></i> {{ current_user.username }} <span class="caret"></span>
+  </a>
 
-
-<h1>User list</h1>
-<table class="table table-hover table-bordered table-striped">
-    {% for user in all_users%}
-    <tr>
-        <td>
-            {{user.id}} - {{user.username}} - 
-            <a href="{{url_for('delete_user', id=user.id)}}">Delete</a>
-        </td>
-        
-        <br>
-    </tr>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+    <a class="btn" href="{{ url_for('logout') }}">Log out</a>
+    <a class="btn" href="{{ url_for('home') }}">Home</a>
     
-    {% endfor %}
-</table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% endblock%}
