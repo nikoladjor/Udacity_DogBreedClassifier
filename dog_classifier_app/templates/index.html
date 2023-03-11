@@ -27,12 +27,15 @@
 
         <h2 class="important">USAGE INSTRUCTIONS</h2>
         <p>
-        After clicking the start session button above, the virtual session will be started. It will prompt for the username, but the username is only needed
-        for generating the random hash which is needed for temporary storage of uploaded images. This protocol is using flask <a href="https://flask.palletsprojects.com/en/2.2.x/api/#sessions">session</a>.
-        After that, the images can be uploaded and the predicted breed as well as uploaded image will be shown.
+        This application is build using a Flask-Login interface. After logging in, user can upload images which will be scanned and dog breed predicted from the uploaded image.
+        In the admin area, one can see how are database models stored.
+        <div class="alert alert-warning" role="alert">
+            The admin area is only for demonstration purposes, there is not default superuser account, every logged in user can see and manipulate the admin area. It is used in this project for further extensions.
+        </div>
+          
         </p>
         <h2 class="important">DATA DISCLAIMER</h2>
-        <p>Since there is no limit to what image can be uploaded, the only guaranty is that I will not process nor use the images. The code is proveded on GitHub, and thus it can be seen there that the temporary storage is deleted after clicking stop-session button.</p>
+        <p>Since there is no limit to what image can be uploaded, the only guaranty is that I will not process nor use the images. The source code is proveded on GitHub, and it is not ready for pushing it to a production server, but rather should be used as a base for ML-based Flask projects.</p>
     </div>
     
 </div>

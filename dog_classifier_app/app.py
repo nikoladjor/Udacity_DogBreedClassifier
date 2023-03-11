@@ -316,7 +316,10 @@ def file_uploader():
             if not os.path.exists(fpath):
                 f.save(fpath)
                 p_string, breed, probs_dict = dog_breed_clasifier(model=app.default_model, img_path=Path(fpath), network=app._NETWORK)
-
+                if not breed:
+                    # NO breed predicted
+                    breed = "No prediction!"
+                    probs_dict = {'None': 1.0}
                 # After image upload, store the data in database
                 img = Image(image_path=fpath, user_id=current_user.id, 
                             filename=filename, predicted_breed=breed)
