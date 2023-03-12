@@ -33,12 +33,6 @@ from datetime import datetime
 UPLOAD_FOLDER = Path(__file__).parent / 'static/images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
-def get_num_images(db, hash):
-    return len(db[db.hash == hash]['original'].unique())
-
-def get_images(db, hash):
-    return list(db[db.hash==hash]['original'].unique())
-
 
 # create and configure the app
 app = Flask(__name__, template_folder='templates/', instance_relative_config=True)
@@ -268,13 +262,17 @@ def add_user():
             user.verify_upload_folder()
             db.session.add(user)
             db.session.commit()
+            next_page = request.args.get("next")
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('home')
+            return redirect(next_page)
 
         username = form.username.data
         form.username.data = ''
         form.email_address.data = ''
     
     all_users = User.query.order_by(User.date_created)
-    return render_template("add_user.html", username=username, form=form, all_users=all_users)
+    return render_template("add_user.html", username=username, form=form, all_users=all_users, next=request.url)
 
 
 @app.route('/user/delete/<int:id>')
