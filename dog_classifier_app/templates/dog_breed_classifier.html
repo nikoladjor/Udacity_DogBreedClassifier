@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Test Name Form!
+{% endblock title %}
+
+
+{% block content %}
+
+
+{% for message in get_flashed_messages() %}
+
+<div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endfor %}
+
+<div class="container">
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ form.image.label(
+            class="form-label"
+        ) }}
+        {{ form.image(class="form-control") }}
+        <br/>
+        {{ form.submit(
+            class='btn btn-primary'
+        ) }}
+    </form>
+
+    <br/>
+    <div class="row">
+        {% for img in user_images %}
+        <div class="col-sm-4">
+            <div class="card">
+              
+              <img class="card-image" src="{{ url_for('static', filename='images/usr_None' + '_' +user.folder_hash + '/' + img.filename)}}">
+    
+              <div class="card-body">
+                  <p>Predicted breed: {{img.predicted_breed}}</p>
+                  <h3>Probabilities:</h3>
+                  <table class="table table-hover table-bordered table-striped table-responsive">
+                    <thead>
+                      <tr>
+                        <th scope="col">Breed</th>
+                        <th scope="col">Probability</th>
+                      </tr>
+                    </thead>
+
+                    {% for breedprob in img.predictions%}
+                    <tr>
+                      <th scope="row"> {{breedprob.breed}} </th>
+                      <td>{{ "%.2f"|format(100*breedprob.probability) }}%</td>
+                    </tr>
+                    {% endfor %}
+                  </table>
+                    
+                <a href="{{url_for('delete_image', id=img.id)}}" class="btn btn-primary">Delete</a>
+              </div>
+            </div>
+          </div>
+        {% endfor%}
+    </div>
+
+
+    
+</div>
+
+
+{% endblock content%}

@@ -28,4 +28,6 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+RUN python create_db.py
+RUN sh init_db.sh
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "dog_classifier_app.app:app"]

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Test Login Form!
+{% endblock title %}
+
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+
+<div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endfor %}
+
+
+<div class="container">
+    <h1>LogIn User</h1>
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control") }}
+        <br/>
+        {{ form.password.label(class="form-label")}}
+        {{ form.password(class="form-control") }}
+        <br/>
+        {{ form.submit(class='btn btn-primary') }}
+    </form>
+    <br/>
+    <p>No account yet? </p>
+    <a class="btn btn-primary" href="/user/add" role="button">Create User</a>
+</div>
+
+
+
+
+{% endblock content%}
