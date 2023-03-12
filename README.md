@@ -4,7 +4,7 @@
 [image2]: ./dog_classifier_app/mlsrc/data/images/vgg16_model.png "VGG-16 Model Keras Layers"
 [image3]: ./dog_classifier_app/mlsrc/data/images/vgg16_model_draw.png "VGG16 Model Figure"
 [imageHomepage]: ./docs/DogBreedHomePage.png 	"App Home Page"
-[imageUpload]: ./docs/DogBreedImageUpload.png 	"App Image Upload"
+[imageUpload]: ./docs/DogBreed_login.png 	"App Image Upload"
 [imageUsage]: ./docs/DogBreedExample.png		"App Example Usage"
 
 
@@ -49,7 +49,7 @@ In order to achieve the required high accuracy while keeping the training time a
 After the server start, the homepage should look like this:\
 ![HomePage][imageHomepage]
 
-After creating a session, an user can upload images:
+After creating a session (creating a user account and logging-in), the user can upload images:
 ![Upload][imageUpload]
 
 
@@ -67,11 +67,13 @@ The app is developed using `python 3.10.7` and all packages can be installed usi
 git clone https://github.com/nikoladjor/Udacity_DogBreedClassifier
 pip install requirements.txt
 ```
-After installation, the app can be started as using standard flask command:
+After installation, the app can be started by using standard flask command:
 ```python
-flask --app dog_classifier_app/app.py --debug run
+python create_db.py                                 # This will perform needed file and table creation
+flask --app dog_classifier_app/app.py db init       # This will prepare migrations in case of editing
+flask --app dog_classifier_app/app.py --debug run   # This acually runs the app
 ```
-> **NOTE**: during the testing on macOS, I had an issue with SSL certificates that are needed to download the ResNet50. This is why I also decided to publish the app with Docker as well.
+> **NOTE**: during the testing on macOS, I had an issue with SSL certificates that are needed to download the ResNet50. This is why I also decided to publish some boilerplate code so that the app can be Dockerized as well.
 
 
 #### Installation using Docker
@@ -81,7 +83,7 @@ Assuming that Docker is up and running, try to build and run the container
 ```bash
 docker build -t test_me:latest .
 ```
-
+>**NOTE**: The Docker file serves only as a boilerplate for dockerizing. If this is needed, users are encoureged to complete the Dockerization.
 
 
 >**NOTE**: The original version of project that can be cloned from Udacity GitHub repository can be found in [docs folder](./docs/README_OLD.md). The training jupyter notebook is using virtual environment pre-set on AWS and is different from the environment used for the app developement. 
