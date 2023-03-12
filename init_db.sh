@@ -1,0 +1,1 @@
+flask --app dog_classifier/app.py db init
